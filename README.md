@@ -244,13 +244,3 @@ npm run build                # production build
 - No secrets are committed; `.env` is gitignored and `.env.example` holds
   only local-dev defaults (`seatlock` / `seatlock`, and a placeholder
   `AUTH_SECRET` with instructions to generate your own).
-
-### AI tool usage disclosure
-
-This project was built with substantial assistance from Claude (Anthropic's
-AI coding assistant) for scaffolding, the concurrency-safe query design, API
-route implementation, the frontend UI, the concurrency test script, and this
-README. The approach — atomic conditional `UPDATE` statements for every seat
-state transition instead of explicit row locks or optimistic retries — was
-reviewed, tested against the included concurrency test, and is understood
-and explainable by the author.
