@@ -1,0 +1,114 @@
+{
+  "info": {
+    "name": "SeatLock API",
+    "description": "Concurrent train seat booking API (Next.js Route Handlers). Base URL defaults to http://localhost:3000. Enable Postman's cookie jar so the session cookie from signup/login carries into the booking requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Sign up",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/auth/signup",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alice@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "description": "Creates an account and starts a session (sets the seatlock_session cookie). 409 if the email is already taken."
+          }
+        },
+        {
+          "name": "Log in",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alice@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "description": "Starts a session for an existing account. 401 on wrong email/password."
+          }
+        },
+        {
+          "name": "Log out",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/logout",
+            "description": "Clears the session cookie."
+          }
+        },
+        {
+          "name": "Current session",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/auth/me",
+            "description": "Returns { email } for the current session, or { email: null } if logged out."
+          }
+        }
+      ]
+    },
+    {
+      "name": "List seats",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/seats",
+        "description": "Returns all 20 seats with live status. Also reclaims any expired locks. Public — no login required."
+      }
+    },
+    {
+      "name": "Lock seats",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/seats/lock",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"seatIds\": [1]\n}"
+        },
+        "description": "Requires a logged-in session (401 otherwise). Locks the given seats for 2 minutes for the current user. 409 with unavailableSeatIds if any requested seat is already locked/booked."
+      }
+    },
+    {
+      "name": "Confirm booking",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/bookings/confirm",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"seatIds\": [1]\n}"
+        },
+        "description": "Requires a logged-in session (401 otherwise). Confirms a non-expired lock held by the current user into a persisted Booking. 409 if the lock expired or was lost."
+      }
+    },
+    {
+      "name": "Cancel reservation",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/bookings/cancel",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"seatIds\": [1]\n}"
+        },
+        "description": "Requires a logged-in session (401 otherwise). Releases a lock held by the current user back to AVAILABLE."
+      }
+    },
+    {
+      "name": "Booking history",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/bookings",
+        "description": "Requires a logged-in session (401 otherwise). Bonus: lists all confirmed bookings with the booking user's email."
+      }
+    }
+  ]
+}
